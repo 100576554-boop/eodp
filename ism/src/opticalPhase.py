@@ -83,7 +83,7 @@ class opticalPhase(initIsm):
 
         return toa
 
-    def rad2Irrad(self, toa, D, f, Tr):
+    def rad2Irrad(self, toa, D, f, Tr): #parameters which are scalar
         """
         Radiance to Irradiance conversion
         :param toa: Input TOA image in radiances [mW/sr/m2]
@@ -93,6 +93,7 @@ class opticalPhase(initIsm):
         :return: TOA image in irradiances [mW/m2]
         """
         # TODO
+        toa = Tr * toa * (np.pi/4) * (D/f)**2
         return toa
 
 
@@ -115,6 +116,26 @@ class opticalPhase(initIsm):
         :return: TOA image 2D in radiances [mW/m2]
         """
         # TODO
+        # Read the ISRF and normalise it with its integral
+        # ------------------------------------------------------------
+        # wv in [um]
+        isrf, wv_isrf = readIsrf(self.auxdir + '/' + self.ismConfig.isrffile, band)
+        isrf_n = isrf/np.sum(isrf)
+
+        wv_isrf = wv_isrf * 1000 #nanometers
+
+        toa = np.zeros((sgm_toa.shape[0], sgm_toa.shape[1]))
+
+        # Apply the filter
+        for ialt in range (sgm_toa.shape[0]):
+            for iact in range (sgm_toa.shape[1]):
+
+                cs = interp1d(sgm_wv, sgm_toa[ialt, iact, :], fill_value=(0,0), bounds_error = False)
+                toa_i = cs(wv_isrf) #we get interpolated toa
+                L_i = toa_i*isrf_n
+                L = np.sum(L_i)
+                toa[[ialt],[iact]] = L
+
         return toa
 
 
