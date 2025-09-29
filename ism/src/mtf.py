@@ -92,6 +92,26 @@ class mtf:
         :return fnAlt: 1D normalised frequencies 2D ALT (f/(1/w))
         """
         #TODO
+        fstepAlt = 1 / nlines / w
+        fstepAct = 1 / ncolumns / w
+
+        eps = 1e-10
+        fAlt = np.arange(-1 / (2 * w), 1 / (2 * w) - eps, fstepAlt) #non lo so qualcosa non prende l'ulitmo valore per questo mettiamo eps
+        fAct = np.arange(-1 / (2 * w), 1 / (2 * w) - eps, fstepAct)
+
+        cut_off_f = D/(lambd*focal)
+        frAlt = fAlt/cut_off_f
+        frAct = fAct/cut_off_f
+
+        fnAlt = fAlt /(1/w)
+        fnAct = fAct / (1 / w)
+
+        [fnAltxx, fnActxx] = np.meshgrid(fnAlt, fnAct, indexing='ij')  # Please use ‘ij’ indexing or you will get the transponse
+        fn2D = np.sqrt(fnAltxx * fnAltxx + fnActxx * fnActxx)
+
+        [frAltxx, frActxx] = np.meshgrid(frAlt, frAct,indexing='ij')  # Please use ‘ij’ indexing or you will get the transponse
+        fr2D = np.sqrt(frAltxx * frAltxx + frActxx * frActxx)  #compare and check if they are equal
+
         return fn2D, fr2D, fnAct, fnAlt
 
     def mtfDiffract(self,fr2D):
