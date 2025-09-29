@@ -11,11 +11,11 @@ def check_toa_difference(myout_dir, out_dir, filename, threshold_percent=0.01):
     toa = readToa(myout_dir, os.path.join(myout_dir, filename))
     toa_out = readToa(out_dir, os.path.join(out_dir, filename))
 
-    diff_rel = np.abs((toa - toa_out) / toa_out) * 100  # differenza percentuale
+    diff_rel = np.abs((toa - toa_out) / toa_out) * 100  # % difference
 
     # check values under threshold
     verify = diff_rel < threshold_percent
-    percent_check = np.sum(verify) / verify.size * 100 #it coould be used also a mean value of the difference and considering
+    percent_check = np.sum(verify) / verify.size * 100 #it could be used also a mean value of the difference and considering
     # the std deviation, evaluating the 3sigma of the values, but to be more precise I choose to check each value (not good for big matrix)
 
     print(f"{filename}: {percent_check:.2f}% of values has difference < {threshold_percent}%")
@@ -47,8 +47,8 @@ def plot_comparison(dir1, dir2, file1, file2,label1="File1", label2="File2", tit
 
     # Plot
     plt.figure(figsize=(10, 5))
-    plt.plot(line1, label=label1, color='k', linewidth=1.5)
-    plt.plot(line2, label=label2, color='red', linewidth=1.5)
+    plt.plot(line1, label=label1, color='k', linewidth=1)
+    plt.plot(line2, label=label2, color='red', linewidth=1)
     plt.xlabel("ACT_columns")
     plt.ylabel("TOA")
     plt.grid(True)
@@ -77,7 +77,7 @@ for i in range(4):
 for i in range(4):
     file_noeq = f"l1b_toa_VNIR-{i}.nc"
     file_mine = f"l1b_toa_VNIR-{i}.nc"
-    plot_comparison(noeq_dir, myout_dir, file_noeq, file_mine,label1="no_eq", label2="eq",title=f"Compare TOA VNIR-{i}")
+    plot_comparison(noeq_dir, myout_dir, file_noeq, file_mine,label1="no_eq", label2="eq",title=f"(EQ=FALSE) Compare TOA VNIR-{i}")
 
 
 
