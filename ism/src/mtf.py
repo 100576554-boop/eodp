@@ -69,7 +69,7 @@ class mtf:
 
         # Calculate the System MTF
         self.logger.debug("Calculation of the Sysmtem MTF by multiplying the different contributors")
-        Hsys = 1 # dummy
+        Hsys = Hdiff*Hdefoc*Hwfe*Hdet*Hsmear*Hmotion
 
         # Plot cuts ACT/ALT of the MTF
         self.plotMtf(Hdiff, Hdefoc, Hwfe, Hdet, Hsmear, Hmotion, Hsys, nlines, ncolumns, fnAct, fnAlt, directory, band)
@@ -162,6 +162,7 @@ class mtf:
         :return: detector MTF
         """
         #TODO
+        Hdet = np.abs(np.sinc(fn2D))
         return Hdet
 
     def mtfSmearing(self, fnAlt, ncolumns, ksmear):
@@ -173,6 +174,11 @@ class mtf:
         :return: Smearing MTF
         """
         #TODO
+
+        fnAlt_col = fnAlt.reshape(-1,1)
+        Hsmear = np.sinc(ksmear*fnAlt_col)
+        Hsmear = np.tile(Hsmear, (1,ncolumns))
+
         return Hsmear
 
     def mtfMotion(self, fn2D, kmotion):
@@ -183,6 +189,7 @@ class mtf:
         :return: detector MTF
         """
         #TODO
+        Hmotion= np.sinc(kmotion*fn2D)
         return Hmotion
 
     def plotMtf(self,Hdiff, Hdefoc, Hwfe, Hdet, Hsmear, Hmotion, Hsys, nlines, ncolumns, fnAct, fnAlt, directory, band):
