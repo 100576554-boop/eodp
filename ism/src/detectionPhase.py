@@ -22,7 +22,7 @@ class detectionPhase(initIsm):
         # -------------------------------------------------------------------------------
         self.logger.info("EODP-ALG-ISM-2010: Irradiances to Photons")
         area_pix = self.ismConfig.pix_size * self.ismConfig.pix_size # [m2]
-        toa = self.irrad2Phot(toa, area_pix, self.ismConfig.t_int, self.ismConfig.wv[int(band[-1])])
+        toa = self.irrad2Phot(toa, area_pix, self.ismConfig.t_int, self.ismConfig.wv[int(band[-1])], band)
 
         self.logger.debug("TOA [0,0] " +str(toa[0,0]) + " [ph]")
 
@@ -95,7 +95,7 @@ class detectionPhase(initIsm):
         return toa
 
 
-    def irrad2Phot(self, toa, area_pix, tint, wv):
+    def irrad2Phot(self, toa, area_pix, tint, wv, band):
         """
         Conversion of the input Irradiances to Photons
         :param toa: input TOA in irradiances [mW/m2]
@@ -110,6 +110,17 @@ class detectionPhase(initIsm):
         e_in = toa*area_pix*tint/1000
         e_ph = h*c/wv
         toa_ph = e_in/e_ph
+        irrad_to_phot = (area_pix * tint / 1000.0) / (h * c / wv)
+
+        out_path = r'C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\MyOutputs_ISM_EODP\irrad_to_phot.txt'
+
+        if band == 'VNIR-0':
+             with open(out_path, 'w') as f:
+                 f.write('Irradiance to Photons conversion factors\n')
+                 f.write('----------------------------------------\n')
+
+        with open(out_path, 'a') as f:
+             f.write(f'{band:8s} : irrad_to_phot = {irrad_to_phot:.6e}\n')
         return toa_ph
 
     def phot2Electr(self, toa, QE):
@@ -145,7 +156,7 @@ class detectionPhase(initIsm):
         :return: TOA after adding PRNU [e-]
         """
         #TODO
-        prnu = kprnu * np.random.normal(0, 1, toa.shape[1]) # Standard normal distribution --- np random lei ha fatto il seed da np random
+        prnu = kprnu * np.random.normal(0, 1, toa.shape[1]) # Standard normal distribution
         toa = (1+prnu) * toa
         return toa
 
