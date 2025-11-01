@@ -17,7 +17,7 @@ class videoChainPhase(initIsm):
         self.logger.info("EODP-ALG-ISM-3010: Electrons to Voltage – Read-out and Amplification")
         toa = self.electr2Volt(toa,
                          self.ismConfig.OCF,
-                         self.ismConfig.ADC_gain)
+                         self.ismConfig.ADC_gain, band)
 
         self.logger.debug("TOA [0,0] " +str(toa[0,0]) + " [V]")
 
@@ -27,7 +27,7 @@ class videoChainPhase(initIsm):
         toa = self.digitisation(toa,
                           self.ismConfig.bit_depth,
                           self.ismConfig.min_voltage,
-                          self.ismConfig.max_voltage)
+                          self.ismConfig.max_voltage, band)
 
         self.logger.debug("TOA [0,0] " +str(toa[0,0]) + " [DN]")
 
@@ -45,7 +45,7 @@ class videoChainPhase(initIsm):
 
         return toa
 
-    def electr2Volt(self, toa, OCF, gain_adc):
+    def electr2Volt(self, toa, OCF, gain_adc, band):
         """
         Electron to Volts conversion.
         Simulates the read-out and the amplification
@@ -57,9 +57,19 @@ class videoChainPhase(initIsm):
         """
         #TODO
         toa = toa * OCF * gain_adc
+        el_to_volt = OCF * gain_adc
+        out_path = r'C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\MyOutputs_ISM_EODP\el_to_volt.txt'
+
+        if band == 'VNIR-0':
+            with open(out_path, 'w') as f:
+                f.write('Electrons to Volts conversion factors\n')
+                f.write('----------------------------------------\n')
+
+        with open(out_path, 'a') as f:
+            f.write(f'{band:8s} : el_to_volt = {el_to_volt:.6e}\n')
         return toa
 
-    def digitisation(self, toa, bit_depth, min_voltage, max_voltage):
+    def digitisation(self, toa, bit_depth, min_voltage, max_voltage, band):
         """
         Digitisation - conversion from Volts to Digital counts
         :param toa: input toa in [V]
@@ -72,5 +82,16 @@ class videoChainPhase(initIsm):
         saturation = (2**bit_depth-1)
         toa_dn = np.round((toa/(max_voltage-min_voltage))*(2**bit_depth-1))
         toa_dn = np.clip(toa_dn, 0, 2**bit_depth-1)
+        volt_to_digit = (2**bit_depth-1)/(max_voltage-min_voltage)
+        out_path = r'C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\MyOutputs_ISM_EODP\volt_to_digit.txt'
+
+        if band == 'VNIR-0':
+            with open(out_path, 'w') as f:
+                f.write('Volts to Digital counts conversion factors\n')
+                f.write('----------------------------------------\n')
+
+        with open(out_path, 'a') as f:
+            f.write(f'{band:8s} : volt_to_digit = {volt_to_digit:.6e}\n')
+
         return toa_dn
 
