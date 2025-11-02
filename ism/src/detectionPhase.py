@@ -29,7 +29,7 @@ class detectionPhase(initIsm):
         # Photon to electrons conversion
         # -------------------------------------------------------------------------------
         self.logger.info("EODP-ALG-ISM-2030: Photons to Electrons")
-        toa = self.phot2Electr(toa, self.ismConfig.QE)
+        toa = self.phot2Electr(toa, self.ismConfig.QE, band)
 
         self.logger.debug("TOA [0,0] " +str(toa[0,0]) + " [e-]")
 
@@ -123,7 +123,7 @@ class detectionPhase(initIsm):
              f.write(f'{band:8s} : irrad_to_phot = {irrad_to_phot:.6e}\n')
         return toa_ph
 
-    def phot2Electr(self, toa, QE):
+    def phot2Electr(self, toa, QE, band):
         """
         Conversion of photons to electrons
         :param toa: input TOA in photons [ph]
@@ -132,6 +132,24 @@ class detectionPhase(initIsm):
         """
         #TODO
         toae = toa*QE
+
+        # --- Saturation check (physical) ---
+        FWC = self.ismConfig.FWC  # Full Well Capacity in electrons
+        saturated_mask = toae >= FWC
+        n_sat = np.sum(saturated_mask)
+        pct_sat = 100 * n_sat / toae.size
+
+        # Save results
+        out_path = r'C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\MyOutputs_ISM_EODP\saturated_pixels.txt'
+        if band == 'VNIR-0':
+            with open(out_path, 'w') as f:
+                f.write('--- PHOTONS -> ELECTRONS STAGE ---\n')
+                f.write('Band     | Saturated px | % Saturation\n')
+                f.write('--------------------------------------\n')
+
+        with open(out_path, 'a') as f:
+            f.write(f'{band:8s} | {n_sat:12d} | {pct_sat:6.3f}%\n')
+
         return toae
 
     def badDeadPixels(self, toa,bad_pix,dead_pix,bad_pix_red,dead_pix_red):
