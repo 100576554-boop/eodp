@@ -132,7 +132,7 @@ class detectionPhase(initIsm):
         """
         #TODO
         toae = toa*QE
-
+        toae = np.minimum(toae, self.ismConfig.FWC)
         # --- Saturation check (physical) ---
         FWC = self.ismConfig.FWC  # Full Well Capacity in electrons
         saturated_mask = toae >= FWC
