@@ -59,7 +59,7 @@ class mtf:
         Hwfe = self.mtfWfeAberrations(fr2D, lambd, kLF, wLF, kHF, wHF)
 
         # Detector
-        Hdet  = self. mtfDetector(fn2D)
+        Hdet  = self.mtfDetector(fn2D)
 
         # Smearing MTF
         Hsmear = self.mtfSmearing(fnAlt, ncolumns, ksmear)
@@ -96,8 +96,8 @@ class mtf:
         fstepAct = 1 / ncolumns / w
 
         eps = 1e-10
-        fAlt = np.arange(-1 / (2 * w), 1 / (2 * w) - eps, fstepAlt) #non lo so qualcosa non prende l'ulitmo valore per questo mettiamo eps
-        fAct = np.arange(-1 / (2 * w), 1 / (2 * w) - eps, fstepAct)
+        fAlt = np.arange(-1 / (2 * w), 1 / (2 * w) - eps , fstepAlt)
+        fAct = np.arange(-1 / (2 * w), 1 / (2 * w) - eps , fstepAct)
 
         cut_off_f = D/(lambd*focal)
         frAlt = fAlt/cut_off_f
@@ -137,7 +137,7 @@ class mtf:
         #TODO
         x = np.pi * defocus * fr2D *(1-fr2D)
         j1(x)
-        Hdefoc = 2*j1(x)/x
+        Hdefoc = (2*j1(x))/x
         return Hdefoc
 
     def mtfWfeAberrations(self, fr2D, lambd, kLF, wLF, kHF, wHF):
@@ -192,9 +192,9 @@ class mtf:
         Hmotion= np.sinc(kmotion*fn2D)
         return Hmotion
 
-    def plotMtf(self,Hdiff, Hdefoc, Hwfe, Hdet, Hsmear, Hmotion, Hsys, nlines, ncolumns, fnAct, fnAlt, directory, band):
+    def plotMtf(self, Hdiff, Hdefoc, Hwfe, Hdet, Hsmear, Hmotion, Hsys, nlines, ncolumns, fnAct, fnAlt, directory, band):
         """
-        Plotting the system MTF and all of its contributors
+        Plotting the system MTF and all of its contributors (one plot per direction)
         :param Hdiff: Diffraction MTF
         :param Hdefoc: Defocusing MTF
         :param Hwfe: Wavefront electronics MTF
@@ -210,6 +210,99 @@ class mtf:
         :param band: band
         :return: N/A
         """
-        #TODO
+
+        # Central pixel coordinates
+        ic = nlines // 2
+        jc = ncolumns // 2
+
+        # Extract 1D profiles (ACT: horizontal, ALT: vertical)
+        act_curves = {
+            'Diffraction': Hdiff[ic, :],
+            'Defocus': Hdefoc[ic, :],
+            'WFE': Hwfe[ic, :],
+            'Detector': Hdet[ic, :],
+            'Smear': Hsmear[ic, :],
+            'Motion': Hmotion[ic, :],
+            'System': Hsys[ic, :]
+        }
+
+        alt_curves = {
+            'Diffraction': Hdiff[:, jc],
+            'Defocus': Hdefoc[:, jc],
+            'WFE': Hwfe[:, jc],
+            'Detector': Hdet[:, jc],
+            'Smear': Hsmear[:, jc],
+            'Motion': Hmotion[:, jc],
+            'System': Hsys[:, jc]
+        }
+
+        # Color scheme (same as before)
+        colors = {
+            'Diffraction': '#1f77b4',
+            'Defocus': '#ff7f0e',
+            'WFE': '#2ca02c',
+            'Detector': '#d62728',
+            'Smear': '#9467bd',
+            'Motion': '#8c564b',
+            'System': '#000000'
+        }
+
+        # Helper function for plotting one direction
+        def plot_direction(direction, fn, curves):
+            fig, ax = plt.subplots(figsize=(8, 6))
+
+            # Plot all MTF contributors (dashed)
+            for key in ['Diffraction', 'Defocus', 'WFE', 'Detector', 'Smear', 'Motion']:
+                ax.plot(fn, curves[key],
+                        color=colors[key],
+                        linewidth=1.4,
+                        alpha=0.9,
+                        label=key)
+
+            # System MTF line (bold, with markers)
+            ax.plot(fn, curves['System'],
+                    color=colors['System'],
+                    linewidth=2.4,
+                    marker='o',
+                    markersize=3,
+                    markevery=max(1, len(fn) // 25),
+                    label='System')
+
+            # Nyquist line and annotation of Hsys at Nyquist
+            nyquist = 0.5
+            ax.axvline(nyquist, color='k', linestyle=':', alpha=0.8)
+
+            # Interpolate Hsys value at Nyquist
+            if fn.min() <= nyquist <= fn.max():
+                hsys_vals = curves['System']
+                h_nyq = np.interp(nyquist, fn, hsys_vals)
+                ax.plot(nyquist, h_nyq, 'o', color=colors['System'], ms=6, zorder=5)
+                ax.annotate(f'Hsys@Nyquist = {h_nyq:.3f}',
+                            xy=(nyquist, h_nyq),
+                            xytext=(nyquist + 0.03, min(1.0, h_nyq + 0.15)),
+                            arrowprops=dict(arrowstyle='->', lw=1, color='0.3'),
+                            fontsize=10,
+                            bbox=dict(boxstyle='round,pad=0.25', fc='white', ec='0.8', alpha=0.9))
+
+            # Axis labels and formatting
+            ax.set_title(f'{band} — MTF in {direction} direction', fontsize=12)
+            ax.set_xlabel('Normalized spatial frequency f / (1/w)')
+            ax.set_ylabel('MTF')
+            ax.set_xlim(0.0, 0.55)
+            ax.set_ylim(0.0, 1.05)
+            ax.grid(True, alpha=0.3)
+            ax.legend(loc='upper right', frameon=False, fontsize=9)
+            plt.tight_layout()
+
+            # Save figure
+            save_name = f'mtf_{direction.lower()}_{band}.png'.replace(' ', '_')
+            fig.savefig(os.path.join(directory, save_name), dpi=150, bbox_inches='tight')
+            plt.close(fig)
+
+        # Generate plots
+        plot_direction('ACT', fnAct, act_curves)
+        plot_direction('ALT', fnAlt, alt_curves)
+
+
 
 
