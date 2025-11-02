@@ -25,8 +25,8 @@ def plot_comparison(dir1, dir2, file1, file2,label1="File1", label2="File2", tit
 
     # Plot
     plt.figure(figsize=(10, 5))
-    plt.plot(line1, label=label1, color='k', linewidth=1)
-    plt.plot(line2, label=label2, color='red', linewidth=1)
+    plt.plot(line1, label=label1, linestyle='-', color='b', linewidth=2)
+    plt.plot(line2, label=label2, linestyle='-', color='r', linewidth=1)
     plt.xlabel("ACT_columns")
     plt.ylabel("TOA")
     plt.grid(True)
@@ -42,8 +42,12 @@ l1b_dir = r"C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\MyOutputL1B_16_10_EODP"
 # --- Loop comparing values ---
 for i in range(4):
     file_isrf = f"ism_toa_isrf_VNIR-{i}.nc"
-    file_l1b = f"l1b_toa_VNIR-{i}.nc"
-    plot_comparison(l1b_dir, myout_dir, file_l1b, file_isrf, label2="ism_toa_isrf", label1="l1b_toa",
-                title=f"Compare TOA VNIR-{i}")
+    file_l1b  = f"l1b_toa_VNIR-{i}.nc"
+    plot_comparison(
+        l1b_dir, myout_dir,
+        file_l1b, file_isrf,
+        label1="l1b_toa", label2="ism_toa_isrf",
+        title=f"Compare TOA VNIR-{i}"
+    )
 
 
