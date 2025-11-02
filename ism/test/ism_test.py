@@ -32,10 +32,8 @@ def check_toa_difference(myout_dir, out_dir, filename, threshold_percent=0.01):
 
 
 # --- Folders ---
-isrf_dir = r"C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\EODP-TS-ISM\output"
 myout_dir = r"C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\MyOutputs_ISM_EODP"
 out_dir = r"C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\EODP-TS-ISM\output"
-noeq_dir = r"C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\MyOutputFALSE_EODP"
 
 # --- Loop comparing values ---
 for i in range(4):
@@ -60,5 +58,9 @@ for i in range(4):
 
 for i in range(4):
     filename = f"ism_toa_ds_VNIR-{i}.nc"
+    check_toa_difference(myout_dir, out_dir, filename)
+
+for i in range(4):
+    filename = f"ism_toa_VNIR-{i}.nc"
     check_toa_difference(myout_dir, out_dir, filename)
 
