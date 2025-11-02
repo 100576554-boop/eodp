@@ -8,7 +8,7 @@ auxdir = r'C:\\Users\\ciroa\\Desktop\\UNI\\Erasmus\\EODP\\EODP_code\\eodp\\auxil
 #indir = r"C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\EODP_TER_2021\EODP-TS-E2E\sgm_out" #small scene
 indir = r"C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\EODP_TER_2021\EODP-TS-ISM\input\gradient_alt100_act150" #small scene
 #outdir = r"C:\\Users\\ciroa\\Desktop\\UNI\\Erasmus\\EODP\\MyOutputs_ISM1_EODP"
-outdir = r"C:\Users\ciroa\Desktop\UNI\Erasmus\EODP\MyOutputs_ISM_EODP"
+outdir = r"C:\\Users\\ciroa\\Desktop\\UNI\\Erasmus\\EODP\\MyOutputs_ISM_EODP"
 
 # Initialise the ISM
 myIsm = ism(auxdir, indir, outdir)
